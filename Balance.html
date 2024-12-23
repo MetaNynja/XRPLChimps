@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XRP Token Balance Checker</title>
+    <script src="https://unpkg.com/xrpl@2.0.0/build/xrpl-latest-min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: ;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        button {
+            width: 85%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #balanceDisplay {
+            font-size: 18px;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #222;
+            border-radius: 8px;
+            border: 1px solid #333;
+            color: #fff;
+            word-wrap: break-word;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2></h2>
+        <label for="walletAddress"></label>
+        <input type="text" id="walletAddress" placeholder="Enter XRPL wallet address">
+        <button onclick="checkTokenBalance()">Check CHIMPS Balance</button>
+        <p id="balanceDisplay"></p>
+    </div>
+
+    <script>
+        async function checkTokenBalance() {
+            const walletAddress = document.getElementById('walletAddress').value.trim();
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            balanceDisplay.innerText = ""; // Clear previous balance
+            balanceDisplay.classList.remove("error"); // Remove error class
+
+            if (!walletAddress) {
+                balanceDisplay.innerText = "Please enter a wallet address.";
+                balanceDisplay.classList.add("error");
+                return;
+            }
+
+            const walletRegex = /^r[1-9A-HJ-NP-Za-km-z]{25,34}$/;
+            if (!walletRegex.test(walletAddress)) {
+                balanceDisplay.innerText = "Invalid wallet address.";
+                balanceDisplay.classList.add("error");
+                return;
+            }
+
+            const issuer = "rMdQw9azZu94CedtczEpNwXMjB1jCrZMia";
+            const tokenHex = "4348494D50530000000000000000000000000000"; // The hex value for CHIMPS token
+            const tokenName = "CHIMPS"; // The token name to display
+
+            balanceDisplay.innerText = "Connecting to XRPL...";
+
+            const client = new xrpl.Client("wss://s1.ripple.com/");
+            
+            try {
+                await client.connect();
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Request timed out")), 15000)
+                );
+
+                const response = await Promise.race([
+                    client.request({
+                        "command": "account_lines",
+                        "account": walletAddress,
+                        "ledger_index": "validated"
+                    }),
+                    timeoutPromise
+                ]);
+
+                const lines = response.result.lines;
+
+                const tokenBalance = lines.find(line => {
+                    const currency = line.currency;
+                    return currency === tokenHex && line.account === issuer;
+                });
+
+                // Display the balance or no balance message
+                if (tokenBalance) {
+                    balanceDisplay.innerText = `Balance: ${tokenBalance.balance} ${tokenName}`;
+                } else {
+                    balanceDisplay.innerText = `No balance found for token with currency ${tokenHex} from issuer ${issuer}.`;
+                    balanceDisplay.classList.add("error");
+                }
+
+            } catch (error) {
+                balanceDisplay.innerText = `Error: ${error.message}`;
+                balanceDisplay.classList.add("error");
+            } finally {
+                if (client.isConnected()) {
+                    await client.disconnect();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
