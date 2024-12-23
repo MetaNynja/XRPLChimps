@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable Scrolling Completely</title>
+    <style>
+        /* Prevent scrolling for the whole page */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Disable scrolling */
+        }
+
+        /* Container for the iframe with rounded corners */
+        .container {
+            position: relative;
+            width: 607px;
+            height: 395px;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 1px solid ;
+            border-radius: 8px; /* 8px rounded corners */
+        }
+
+        /* iFrame styles */
+        .container iframe {
+            position: absolute;
+            top: -110px;
+          left: -15px;
+            left: 0;
+            width: 1200px;
+            height: 1000px;
+            border: none;
+            transform-origin: top left;
+            transform: scale(calc(900 / 1200)); /* Scale iframe to match container width */
+        }
+
+        /* Full-screen overlay with rounded corners */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0); /* Transparent but blocks interaction */
+            z-index: 9999; /* Ensure it stays on top */
+            pointer-events: all; /* Ensures the overlay blocks interaction */
+            border-radius: 8px; /* 8px rounded corners */
+        }
+    </style>
+</head>
+<body>
+    <!-- Container for the iframe and overlay -->
+    <div class="container">
+        <!-- Overlay only over the iframe -->
+        <div class="overlay"></div>
+
+        <iframe 
+            src="https://xmagnetic.org/tokens/CHIMPS+rMdQw9azZu94CedtczEpNwXMjB1jCrZMia?network=mainnet">
+        </iframe>
+    </div>
+</body>
+</html>
