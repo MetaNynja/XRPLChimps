@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined HTML</title>
+    <style>
+
+   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        .full-width-button {
+            display: block;
+            width: 100%;
+            border: none;
+            padding: 0;
+            background: none;
+            margin-bottom: 20px;
+            position: relative; /* For positioning the link icon */
+        }
+
+        .full-width-button img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .link-icon, .tool-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional: for better visibility */
+            padding: 5px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .balance-checker-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .balance-checker-container img {
+            width: 100%; /* Ensure the image takes full width */
+            height: auto;
+        }
+
+        .balance-checker {
+            position: absolute;
+            top: 50%;
+            right: 10%; /* Move the form 10% to the left */
+            transform: translateY(-50%);
+            text-align: center;
+            color: #fff;
+            width: 45%;
+            padding: 20px;
+            background-color:;
+            border-radius: 12px;
+            box-sizing: border-box;
+        }
+
+        .balance-checker h2 {
+            font-family: 'Montserrat',sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        .balance-checker input[type="text"],
+        .balance-checker button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 12px;
+            border: none;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .balance-checker input[type="text"] {
+            background-color: #ffffff;
+            color: #000;
+            text-align: center;
+        }
+
+        .balance-checker button {
+            background-color: #038fde;
+            color: #ffffff;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .balance-checker button:hover {
+            background-color: #45a049;
+        }
+
+        .balance-checker #balanceDisplay {
+            font-size: 16px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #ffffff;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .balance-checker .error {
+            color: #e74c3c;
+        }
+    </style>
+    <!-- Font Awesome CDN for the link and tool icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+    <!-- First Full-Width Image Link with Link Icon -->
+    <a href="https://i.ibb.co/c2dWh0P/saving-PNG.jpg" target="_blank" class="full-width-button">
+        <img src="https://i.ibb.co/c2dWh0P/saving-PNG.jpg" alt="Saving Image">
+        <div class="link-icon">
+            <i class="fas fa-link"></i> <!-- Chain link icon from Font Awesome -->
+        </div>
+    </a>
+
+    <!-- Second Full-Width Image Link with Link Icon -->
+    <a href="https://firstledger.net/token/rMdQw9azZu94CedtczEpNwXMjB1jCrZMia/4348494D50530000000000000000000000000000" target="_blank" class="full-width-button">
+        <img src="https://i.ibb.co/DMBL43R/saving-PNG.jpg" alt="Saving Image">
+        <div class="link-icon">
+            <i class="fas fa-link"></i> <!-- Chain link icon from Font Awesome -->
+        </div>
+    </a>
+
+    <!-- Balance Checker Section with Tool Icon on Image -->
+    <div class="balance-checker-container">
+        <img src="https://i.ibb.co/9rRc98k/saving-PNG.jpg" alt="Balance Checker Image">
+        <div class="tool-icon">
+            <i class="fas fa-wrench"></i> <!-- Wrench tool icon from Font Awesome -->
+        </div>
+        <div class="balance-checker">
+            <h2>Balance Checker</h2>
+            <input type="text" id="walletAddress" placeholder="Enter XRPL wallet address">
+            <button onclick="checkTokenBalance()">Check CHIMPS Balance</button>
+            <p id="balanceDisplay"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/xrpl@2.0.0/build/xrpl-latest.min.js"></script>
+    <script>
+        async function checkTokenBalance() {
+            const walletAddress = document.getElementById('walletAddress').value.trim();
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            balanceDisplay.innerText = ""; // Clear previous balance
+            balanceDisplay.classList.remove("error"); // Remove error class
+
+            if (!walletAddress) {
+                balanceDisplay.innerText = "Please enter a wallet address.";
+                balanceDisplay.classList.add("error");
+                return;
+            }
+
+            const walletRegex = /^r[1-9A-HJ-NP-Za-km-z]{25,34}$/;
+            if (!walletRegex.test(walletAddress)) {
+                balanceDisplay.innerText = "Invalid wallet address.";
+                balanceDisplay.classList.add("error");
+                return;
+            }
+
+            const issuer = "rMdQw9azZu94CedtczEpNwXMjB1jCrZMia";
+            const tokenHex = "4348494D50530000000000000000000000000000"; // The hex value for CHIMPS token
+            const tokenName = "CHIMPS"; // The token name to display
+
+            balanceDisplay.innerText = "Connecting to XRPL...";
+
+            const client = new xrpl.Client("wss://s1.ripple.com/");
+            
+            try {
+                await client.connect();
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Request timed out")), 15000)
+                );
+
+                const response = await Promise.race([
+                    client.request({
+                        "command": "account_lines",
+                        "account": walletAddress,
+                        "ledger_index": "validated"
+                    }),
+                    timeoutPromise
+                ]);
+
+                const lines = response.result.lines;
+
+                const tokenBalance = lines.find(line => {
+                    const currency = line.currency;
+                    return currency === tokenHex && line.account === issuer;
+                });
+
+                // Display the balance or no balance message
+                if (tokenBalance) {
+                    balanceDisplay.innerText = `Balance: ${tokenBalance.balance} ${tokenName}`;
+                } else {
+                    balanceDisplay.innerText = `No balance found for token with currency ${tokenHex} from issuer ${issuer}.`;
+                    balanceDisplay.classList.add("error");
+                }
+
+            } catch (error) {
+                balanceDisplay.innerText = `Error: ${error.message}`;
+                balanceDisplay.classList.add("error");
+            } finally {
+                if (client.isConnected()) {
+                    await client.disconnect();
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
